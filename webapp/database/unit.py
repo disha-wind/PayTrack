@@ -2,6 +2,7 @@ import functools
 import os
 from typing import Type, Union, Any
 
+from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
@@ -10,6 +11,9 @@ from database.model import *
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 POSTGRES_DB = os.getenv("POSTGRES_DB")
+
+if not all([POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB]):
+    raise EnvironmentError("Database environment variables are not set properly.")
 
 class Database:
     def __init__(self):
@@ -23,12 +27,13 @@ class Database:
     async def close(self):
         await self.engine.dispose()
     
-    def connect(self, function) -> Any:
+    @staticmethod
+    def connect(function) -> Any:
         @functools.wraps(function)
-        async def wrapper(*args, **kwargs):
+        async def wrapper(self, *args, **kwargs):
             try:
                 async with self.async_session() as session:
-                    result = await function(session, *args, **kwargs)
+                    result = await function(self, session, *args, **kwargs)
                 return result
             except (OSError, SQLAlchemyError) as exc:
                 raise ConnectionError("Database operation failed") from exc
@@ -59,4 +64,13 @@ class Database:
             await session.commit()
         except Exception as exc:
             await session.rollback()
+            raise exc
+    
+    @connect
+    async def get_by_email(self, session: AsyncSession, email: str) -> Union[User, None]:
+        try:
+            result = await session.execute(select(User).where(User.email == email))
+            user = result.scalars().first()
+            return user
+        except Exception as exc:
             raise exc
