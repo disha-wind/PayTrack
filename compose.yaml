@@ -1,13 +1,25 @@
 services:
+  webapp:
+    build:
+      context: webapp
+      dockerfile: Dockerfile
+    container_name: "pay-track_webapp"
+    env_file: webapp/.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+
   database:
     image: postgres
     container_name: "pay-track_postgres-db"
     env_file: database/.env
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 1s
       timeout: 5s
       retries: 10
     ports:
-      - "5432:5432" # for remote access to database
+      - "5432:5432"

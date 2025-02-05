@@ -17,7 +17,7 @@ if not all([POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB]):
 
 class Database:
     def __init__(self):
-        self.engine = create_async_engine(f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost/{POSTGRES_DB}")
+        self.engine = create_async_engine(f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@database/{POSTGRES_DB}")
         self.async_session = async_sessionmaker(self.engine)
 
     async def init(self):
