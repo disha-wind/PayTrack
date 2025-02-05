@@ -21,5 +21,8 @@ async def setup_database(application, loop):
 async def close_database(application, loop):
     await application.ctx.db.close()
 
-app.middleware('request')(auth_middleware)
-register_routes(app)
+
+if __name__ == '__main__':
+    app.middleware('request')(auth_middleware)
+    register_routes(app)
+    app.run(host='0.0.0.0', port=8000, single_process=True)
