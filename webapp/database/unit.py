@@ -74,3 +74,29 @@ class Database:
             return user
         except Exception as exc:
             raise exc
+    
+    @connect
+    async def get_accounts(self, session: AsyncSession, user_id: int) -> list[Account]:
+        try:
+            result = await session.execute(select(Account).where(Account.user_id == user_id))
+            accounts = []
+            accounts.extend(result.scalars().all())
+            return accounts
+        except Exception as exc:
+            raise exc
+        
+    @connect
+    async def get_payments(self, session: AsyncSession, user_id: int) -> list[Payment]:
+        try:
+            result = await session.execute(select(Account).where(Account.user_id == user_id))
+            accounts = []
+            accounts.extend(result.scalars().all())
+            payments = []
+            for account in accounts:
+                result = await session.execute(select(Payment).where(Payment.account_id == account.id))
+                payments.extend(result.scalars().all())
+            return payments
+        except Exception as exc:
+            raise exc
+                
+            
