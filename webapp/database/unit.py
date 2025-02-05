@@ -19,6 +19,7 @@ class Database:
     def __init__(self):
         self.engine = create_async_engine(f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@database/{POSTGRES_DB}")
         self.async_session = async_sessionmaker(self.engine)
+        self.last_session = None
 
     async def init(self):
         async with self.engine.begin() as conn:
@@ -26,6 +27,24 @@ class Database:
     
     async def close(self):
         await self.engine.dispose()
+    
+    async def get_by_id_with_session(self, obj_type: Type[Base], obj_id: int) -> Union[Type[Base], None]:
+        try:
+            self.last_session = self.async_session()
+            obj = await self.last_session.get(obj_type, obj_id)
+            return obj
+        except Exception as exc:
+            raise exc
+    
+    async def commit(self):
+        try:
+            if self.last_session:
+                await self.last_session.commit()
+                self.last_session = None
+        except Exception as exc:
+            await self.last_session.rollback()
+            self.last_session = None
+            raise exc
     
     @staticmethod
     def connect(function) -> Any:
@@ -108,5 +127,21 @@ class Database:
             return payments
         except Exception as exc:
             raise exc
-                
+    
+    @connect
+    async def update_user(self, session: AsyncSession, user_id: int, updated_data: dict) -> None:
+        try:
+            user = await session.get(User, user_id)
+    
+            if not user:
+                return None
+
+            for key, value in updated_data.items():
+                if hasattr(user, key):
+                    setattr(user, key, value)
+    
+            await session.commit()
             
+        except Exception as exc:
+            await session.rollback()
+            raise exc

@@ -2,8 +2,9 @@ from pydantic import ValidationError
 from sanic import Blueprint, response
 
 from api import security
-from api.model import AddUserRequest
+from api.model import AddUserRequest, UpdateUserRequest
 from api.route.everyone import get_user_info
+from api.security import hash_password
 from database.model import User
 
 admin_bp = Blueprint("admin", url_prefix="/admin")
@@ -40,7 +41,31 @@ async def get_user(request, user_id):
 
 @admin_bp.put("/users/<user_id:int>")
 async def update_user(request, user_id):
-    pass
+    try:
+        data = UpdateUserRequest(**request.json)
+
+        user = await request.app.ctx.db.get_by_id_with_session(User, user_id)
+        if not user:
+            return response.json({"message": "User not found"}, status=404)
+        
+        if data.id:
+            user.id = data.id
+        if data.email:
+            user.email = data.email
+        if data.password:
+            user.password_hash = hash_password(data.password)
+        if data.full_name:
+            user.full_name = data.full_name
+        
+        await request.app.ctx.db.commit()
+
+        return response.json({"message": "User updated successfully"}, status=200)
+
+    except ValidationError as e:
+        return response.json({"error": e.errors()}, status=400)
+    except Exception as e:
+        return response.json({"error": str(e)}, status=500)
+
 
 @admin_bp.delete("/users/<user_id:int>")
 async def delete_user(request, user_id):
