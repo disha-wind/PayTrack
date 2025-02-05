@@ -1,3 +1,5 @@
+import hashlib
+
 import bcrypt
 import jwt
 
@@ -26,3 +28,10 @@ def verify_token(token: str, secret_key: str):
         raise Unauthorized("Token expired")
     except jwt.InvalidTokenError:
         raise Unauthorized("Invalid token")
+
+def generate_signature(data: dict, secret_key: str) -> str:
+    sorted_keys = sorted(data.keys())
+    concatenated = ''.join(str(data[key]) for key in sorted_keys)
+    concatenated += secret_key
+    return hashlib.sha256(concatenated.encode()).hexdigest()
+

@@ -18,3 +18,10 @@ class UpdateUserRequest(BaseModel):
     email: Optional[EmailStr] = None
     password: Optional[str] = None
     full_name: Optional[str] = None
+
+class PaymentRequest(BaseModel):
+    transaction_id: str
+    account_id: str
+    user_id: str
+    amount: float
+    signature: str
