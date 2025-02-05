@@ -57,7 +57,7 @@ class Account(Base):
 
     id = Column(BigInteger, primary_key=True)
     user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
-    balance = Column(Numeric(precision=12, scale=2), default=0)
+    balance = Column(Numeric(precision=12, scale=2), server_default="0")
     created_at = Column(DateTime, server_default=func.now())
 
     user = relationship("User", back_populates="accounts")
@@ -67,7 +67,7 @@ class Account(Base):
 class Payment(Base):
     __tablename__ = "payment"
 
-    transaction_id = Column(BigInteger, primary_key=True)
+    transaction_id = Column(String, primary_key=True)
     account_id = Column(BigInteger, ForeignKey("account.id"), nullable=False)
     amount = Column(Numeric(precision=12, scale=2), nullable=False)
     created_at = Column(DateTime, server_default=func.now())

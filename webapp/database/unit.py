@@ -13,7 +13,7 @@ POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 POSTGRES_DB = os.getenv("POSTGRES_DB")
 DB_HOST = os.getenv("DB_HOST")
 
-if not all([POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB]):
+if not all([POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, DB_HOST]):
     raise EnvironmentError("Database environment variables are not set properly.")
 
 class Database:
@@ -146,3 +146,21 @@ class Database:
         except Exception as exc:
             await session.rollback()
             raise exc
+
+    @connect
+    async def add_payment(self, session: AsyncSession, payment: Payment) -> None:
+        try:
+            account = await session.get(Account, payment.account_id)
+    
+            if not account:
+                raise ValueError(f"Account with ID {payment.account_id} not found")
+            
+            # Обновление счета и добавление платежа в рамках одной сессии
+            account.balance += payment.amount
+            session.add(payment)
+            await session.commit()
+    
+        except Exception as exc:
+            await session.rollback()
+            raise exc
+

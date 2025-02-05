@@ -1,10 +1,8 @@
 import hashlib
+from datetime import timedelta, datetime, UTC
 
 import bcrypt
 import jwt
-
-from datetime import timedelta, datetime, UTC
-
 from sanic import Unauthorized
 
 

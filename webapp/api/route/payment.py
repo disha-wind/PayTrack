@@ -3,6 +3,7 @@ from sanic import Blueprint, response, Request
 
 from api.model import PaymentRequest
 from api.security import generate_signature
+from database.model import Account, Payment
 
 payment_bp = Blueprint("payment_bp")
 
@@ -24,8 +25,19 @@ async def payment_webhook(request: Request):
 
         if data.signature != expected_signature:
             return response.json({"error": "Invalid signature"}, status=400)
-
-        # TODO: update data in database
+        
+        if not await request.app.ctx.db.get_by_id(Account, data.account_id):
+            new_account = Account(
+                id=data.account_id,
+                user_id=data.user_id,
+            )
+            await request.app.ctx.db.add(new_account)
+        payment = Payment(
+            account_id=data.account_id,
+            amount=data.amount,
+            transaction_id=data.transaction_id
+        )
+        await request.app.ctx.db.add_payment(payment)
 
         return response.json({"message": "Payment processed successfully"}, status=200)
 

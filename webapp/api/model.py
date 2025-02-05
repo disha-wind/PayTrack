@@ -22,7 +22,7 @@ class UpdateUserRequest(BaseModel):
 
 class PaymentRequest(BaseModel):
     transaction_id: str
-    account_id: str
-    user_id: str
+    account_id: int
+    user_id: int
     amount: Decimal
     signature: str
