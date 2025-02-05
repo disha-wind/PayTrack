@@ -57,6 +57,16 @@ class Database:
             raise exc
     
     @connect
+    async def get_all(self, session: AsyncSession, obj_type: Type[Base]) -> list[Base]:
+        try:
+            result = await session.execute(select(obj_type))
+            objs = []
+            objs.extend(result.scalars().all())
+            return objs
+        except Exception as exc:
+            raise exc
+    
+    @connect
     async def remove_by_id(self, session: AsyncSession, obj_type: Type[Base], obj_id: int) -> None:
         try:
             obj = await session.get(obj_type, obj_id)

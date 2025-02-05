@@ -1,9 +1,36 @@
+from datetime import datetime
+from decimal import Decimal
+
 from sqlalchemy import Column, BigInteger, String, ForeignKey, DateTime, func, Numeric
 from sqlalchemy.orm import DeclarativeBase, relationship
+from sqlalchemy.inspection import inspect
 
 
 class Base(DeclarativeBase):
-    pass
+    def to_dict(self, include_relationships=False, exclude=None):
+        if exclude is None:
+            exclude = []
+
+        data = {}
+        for c in inspect(self).mapper.column_attrs:
+            if c.key not in exclude:
+                value = getattr(self, c.key)
+                if isinstance(value, Decimal):
+                    value = float(value)
+                if isinstance(value, datetime):
+                    value = value.isoformat()
+                data[c.key] = value
+
+        if include_relationships:
+            for rel in inspect(self.__class__).relationships:
+                if rel.key not in exclude:
+                    value = getattr(self, rel.key)
+                    if value is not None:
+                        if rel.uselist:
+                            data[rel.key] = [item.to_dict() for item in value]
+                        else:
+                            data[rel.key] = value.to_dict()
+        return data
 
 class User(Base):
     __tablename__ = "user"

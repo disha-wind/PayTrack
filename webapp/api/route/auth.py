@@ -23,7 +23,7 @@ async def auth_login(request: Request):
             {
                 "id": user.id,
                 "email": user.email,
-                "is_admin": is_admin
+                "is_admin": is_admin is not None
             },
             request.app.config.SECRET_KEY
         )
