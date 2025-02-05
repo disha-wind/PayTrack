@@ -11,13 +11,14 @@ from database.model import *
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 POSTGRES_DB = os.getenv("POSTGRES_DB")
+DB_HOST = os.getenv("DB_HOST")
 
 if not all([POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB]):
     raise EnvironmentError("Database environment variables are not set properly.")
 
 class Database:
     def __init__(self):
-        self.engine = create_async_engine(f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@database/{POSTGRES_DB}")
+        self.engine = create_async_engine(f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}/{POSTGRES_DB}")
         self.async_session = async_sessionmaker(self.engine)
         self.last_session = None
 

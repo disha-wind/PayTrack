@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: "pay-track_webapp"
     env_file: webapp/.env
+    environment:
+      - DB_HOST=database
     ports:
       - "8000:8000"
     depends_on:
