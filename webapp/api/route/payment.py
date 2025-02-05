@@ -15,7 +15,7 @@ async def payment_webhook(request: Request):
         expected_signature = generate_signature(
             {
                 "account_id": data.account_id,
-                "amount": str(data.amount),
+                "amount": data.amount,
                 "transaction_id": data.transaction_id,
                 "user_id": data.user_id
             },

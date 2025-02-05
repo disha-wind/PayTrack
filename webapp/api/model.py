@@ -1,4 +1,5 @@
 from typing import Optional
+from decimal import Decimal
 
 from pydantic import BaseModel, EmailStr
 
@@ -23,5 +24,5 @@ class PaymentRequest(BaseModel):
     transaction_id: str
     account_id: str
     user_id: str
-    amount: float
+    amount: Decimal
     signature: str
