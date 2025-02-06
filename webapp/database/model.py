@@ -40,8 +40,8 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     full_name = Column(String)
 
-    admin = relationship("Admin", back_populates="user", uselist=False)
-    accounts = relationship("Account", back_populates="user")
+    admin = relationship("Admin", back_populates="user", cascade="all, delete", uselist=False)
+    accounts = relationship("Account", back_populates="user", cascade="all, delete")
 
 
 class Admin(Base):
@@ -61,7 +61,7 @@ class Account(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     user = relationship("User", back_populates="accounts")
-    payments = relationship("Payment", back_populates="account")
+    payments = relationship("Payment", back_populates="account", cascade="all, delete")
 
 
 class Payment(Base):
