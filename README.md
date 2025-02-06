@@ -1,119 +1,125 @@
 # PayTrack
 
-## Запуск
+## Запуск проекта
 
-Клонируйте проект
-```shell
-git clone "https://github.com/disha-wind/PayTrack"
-```
-Перейдите в папку проекта
-```shell
-cd PayTrack
-```
+### Клонирование репозитория
 
-### Docker
-Первый и самый простой способ запуска  
-Подразумевается, что Docker уже установлен на вашей платформе
+1. Клонируйте проект с GitHub:
+   ```shell
+   git clone "https://github.com/disha-wind/PayTrack"
+   ```
+2. Перейдите в директорию проекта:
+   ```shell
+   cd PayTrack
+   ```
 
-Запустите контейнеры
-```shell
-docker compose up -d
-```
+## Способы запуска
 
-Выполните миграцию
-```shell
-docker exec -it pay-track_webapp python migrate.py
-```
+### 1. Использование Docker (рекомендуется)
 
-### Python и PostgreSQL
-Второй и более сложный способ запуска  
-Подразумевается, что у вас установлен python 12.8 и PostgreSQL
+> **Предполагается, что Docker уже установлен.**
 
-#### PostgreSQL
+1. Запустите контейнеры:
+   ```shell
+   docker compose up -d
+   ```
 
-Запустите PostgreSQL
+2. Выполните миграцию базы данных:
+   ```shell
+   docker exec -it pay-track_webapp python migrate.py
+   ```
 
-- Linux (systemd)
-    ```shell
-    sudo systemctl start postgresql
-    ```
+### 2. Использование Python и PostgreSQL
 
-- MacOS
-    ```shell
-    brew services start postgresql
-    ```
+> **Предполагается, что у вас установлены Python версии 12.8 и PostgreSQL.**
 
-- Windows
-    ```shell
-    pg_ctl -D "C:\Program Files\PostgreSQL\<версия>\data" start
-    ```
+#### 2.1 Настройка PostgreSQL
 
-Запустите
-```shell
-export $(cat database/.env | xargs)
-psql -U postgres -c "
-CREATE USER \"$POSTGRES_USER\" WITH PASSWORD '$POSTGRES_PASSWORD';
-CREATE DATABASE \"$POSTGRES_DB\" OWNER \"$POSTGRES_USER\";
-ALTER ROLE \"$POSTGRES_USER\" WITH LOGIN;
-"
-```
+1. Запустите PostgreSQL в зависимости от вашей операционной системы:
 
-#### Python
+    - **Linux** (с использованием systemd):
+      ```shell
+      sudo systemctl start postgresql
+      ```
 
-Создайте виртуальную среду в `/webapp`
-```shell
-python -m venv /webapp/venv
-```
+    - **macOS** (с использованием Homebrew):
+      ```shell
+      brew services start postgresql
+      ```
 
-Активируйте виртуальную среду:
-- Linux/macOS:
-    ```shell
-    source /webapp/venv/bin/activate
-    ```
-- Windows
-    ```shell
-    .\webapp\venv\Scripts\activate
-    ```
+    - **Windows**:
+      ```shell
+      pg_ctl -D "C:\Program Files\PostgreSQL\<версия>\data" start
+      ```
 
-Установите зависимости
-```shell
-pip install -r /webapp/requirements.txt
-```
+2. Настройте базу данных и пользователя:
+   ```shell
+   export $(cat database/.env | xargs)
+   psql -U postgres -c "
+   CREATE USER \"$POSTGRES_USER\" WITH PASSWORD '$POSTGRES_PASSWORD';
+   CREATE DATABASE \"$POSTGRES_DB\" OWNER \"$POSTGRES_USER\";
+   ALTER ROLE \"$POSTGRES_USER\" WITH LOGIN;
+   "
+   ```
 
-Установите переменные виртуальной среды из `webapp/.env`
-- Linux/macOS:
-    ```shell
-    set -a
-    source /webapp/.env
-    set +a
-    ```
-- Windows
-    ```shell
-    Get-Content /webapp/.env | ForEach-Object {
-        if ($_ -match "^(.*?)=(.*)$") {
-            Set-Item -Path "Env:$($matches[1])" -Value $matches[2]
-        }
-    }
-    ```
+#### 2.2 Настройка Python
 
-Выполните миграцию
-```shell
-python webapp/migration.py
-```
+1. Создайте виртуальную среду в папке `/webapp`:
+   ```shell
+   python -m venv /webapp/venv
+   ```
 
-Запустите
-```shell
-python webapp/server.py
-```
+2. Активируйте виртуальную среду:
+    - **Linux/macOS**:
+      ```shell
+      source /webapp/venv/bin/activate
+      ```
+    - **Windows**:
+      ```shell
+      .\webapp\venv\Scripts\activate
+      ```
+
+3. Установите все зависимости из `requirements.txt`:
+   ```shell
+   pip install -r /webapp/requirements.txt
+   ```
+
+4. Настройте переменные окружения из файла `.env`:
+    - **Linux/macOS**:
+      ```shell
+      set -a
+      source /webapp/.env
+      set +a
+      ```
+    - **Windows**:
+      ```shell
+      Get-Content /webapp/.env | ForEach-Object {
+          if ($_ -match "^(.*?)=(.*)$") {
+              Set-Item -Path "Env:$($matches[1])" -Value $matches[2]
+          }
+      }
+      ```
+
+5. Выполните миграцию:
+   ```shell
+   python webapp/migration.py
+   ```
+
+6. Запустите сервер:
+   ```shell
+   python webapp/server.py
+   ```
 
 ## Тестовая миграция
-Также тестовая миграция выполнена в виде скрипта `.sql`, расположенного в `database/migration_test.sql`
+
+Тестовая миграция доступна в виде SQL скрипта в `database/migration_test.sql`.
 
 ### Тестовые данные
-Тестовый пользователь:
-- email: `user@gmail.com`
-- password: `hello-world!`
 
-Тестовый администратор:
-- email: `admin@gmail.com`
-- password: `HelloWorld`
+- **Тестовый пользователь**:
+    - Email: `user@gmail.com`
+    - Пароль: `hello-world!`
+
+- **Тестовый администратор**:
+    - Email: `admin@gmail.com`
+    - Пароль: `HelloWorld`
