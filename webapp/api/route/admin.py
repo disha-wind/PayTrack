@@ -69,6 +69,8 @@ async def update_user(request, user_id):
 
 @admin_bp.delete("/users/<user_id:int>")
 async def delete_user(request, user_id):
+    if request.ctx.user["id"] == user_id:
+        return response.json({"error": "You cannot delete yourself"}, status=400)
     try:
         await request.app.ctx.db.remove_by_id(User, user_id)
     except ValueError as e:
