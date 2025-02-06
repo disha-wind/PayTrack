@@ -36,7 +36,7 @@ async def get_users(request):
 async def get_user(request, user_id):
     user = await request.app.ctx.db.get_by_id(User, user_id)
     if not user:
-        return response.json({"message": "User not found"}, status=404)
+        return response.json({"error": "User not found"}, status=404)
     return response.json(user.to_dict(exclude=["password_hash"]))
 
 @admin_bp.put("/users/<user_id:int>")
@@ -69,7 +69,10 @@ async def update_user(request, user_id):
 
 @admin_bp.delete("/users/<user_id:int>")
 async def delete_user(request, user_id):
-    await request.app.ctx.db.remove_by_id(User, user_id)
+    try:
+        await request.app.ctx.db.remove_by_id(User, user_id)
+    except ValueError as e:
+        return response.json({"error": str(e)}, status=404)
     return response.json({"message": "User deleted"})
 
 @admin_bp.get("/users/<user_id:int>/accounts")

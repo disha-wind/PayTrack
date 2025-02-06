@@ -90,6 +90,8 @@ class Database:
     async def remove_by_id(self, session: AsyncSession, obj_type: Type[Base], obj_id: int) -> None:
         try:
             obj = await session.get(obj_type, obj_id)
+            if not obj:
+                raise ValueError("Object not found")
             await session.delete(obj)
             await session.commit()
         except Exception as exc:
