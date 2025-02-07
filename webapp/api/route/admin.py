@@ -1,15 +1,26 @@
 from pydantic import ValidationError
-from sanic import Blueprint, response
+from sanic import Blueprint, response, Request
 
 from api import security
 from api.model import AddUserRequest, UpdateUserRequest
-from api.route.everyone import get_user_info
 from api.security import hash_password
 from database.model import User
 
-admin_bp = Blueprint("admin", url_prefix="/admin")
-admin_bp.add_route(get_user_info, "/me")
 
+admin_bp = Blueprint("admin", url_prefix="/admin")
+
+@admin_bp.get("/me")
+async def get_user_info(request: Request):
+    user = await request.app.ctx.db.get_by_id(User, request.ctx.user["id"])
+    if user:
+        return response.json(
+            {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.full_name
+            }
+        )
+    return response.json({"error": "User not found"}, status=404)
 
 @admin_bp.post("/users")
 async def create_user(request):

@@ -5,7 +5,7 @@ from api.model import PaymentRequest
 from api.security import generate_signature
 from database.model import Account, Payment
 
-payment_bp = Blueprint("payment_bp")
+payment_bp = Blueprint("payment")
 
 
 @payment_bp.post("/webhook/payment")

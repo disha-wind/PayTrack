@@ -1,12 +1,19 @@
 import os
 
 from sanic import Sanic
+from sanic_ext import Extend
 
 from api.middleware import auth_middleware
 from api.route import register_routes
 from database.unit import Database
 
 app = Sanic("PayTrack")
+Extend(app)
+app.ext.openapi.describe(
+    title="PayTrack API",
+    version="0.0.1",
+    description="API documentation for PayTrack"
+)
 
 @app.before_server_start
 async def setup_config(application, loop):
